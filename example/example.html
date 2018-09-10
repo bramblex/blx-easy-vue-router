@@ -12,6 +12,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+    <script src="https://unpkg.com/vue-async-computed"></script>
     <script src="../dist/blx-easy-vue-router.umd.js"></script>
 
     <div id="app">
@@ -54,10 +55,23 @@
             }
         }
 
+        const TestPage = {
+            template: `<div>分页和路由绑定, 可以用 v-model 绑定 <input v-model.number="page"></div>`,
+            easyMapRoute: {
+                page: {
+                    type: 'query',
+                    name: 'page',
+                    adapter: 'number',
+                    default: 1
+                }
+            }
+        }
+
         const routes = [
+            { path: '/test_page', component: TestPage },
             { path: '/foo', component: Foo },
             { path: '/bar', component: Bar },
-            { path: '/test/:id', component: Test }
+            { path: '/test/:id', component: Test },
         ]
 
         // 3. 创建 router 实例，然后传 `routes` 配置
