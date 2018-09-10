@@ -1,0 +1,18 @@
+{
+    "presets": [
+        [
+            "@babel/env",
+            {
+                "targets": {
+                    "browsers": [
+                        "cover 99.5%"
+                    ]
+                },
+                "modules": false
+            }
+        ]
+    ],
+    "plugins": [
+        "@babel/plugin-proposal-object-rest-spread"
+    ]
+}

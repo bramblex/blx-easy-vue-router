@@ -1,3 +1,0 @@
-#!/usr/bin/env node
-
-const { traversalRoutes } = require('../dist/blx-easy-vue-router')

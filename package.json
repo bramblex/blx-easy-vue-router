@@ -1,6 +1,6 @@
 {
   "name": "blx-easy-vue-router",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "main": "dist/blx-easy-vue-router.umd.js",
   "repository": "git@github.com:bramblex/blx-easy-vue-router.git",
   "author": "乔健 <qjnight@gmail.com>",
@@ -12,7 +12,6 @@
     "rollup-plugin-babel": "^4.0.0-beta.8"
   },
   "dependencies": {
-    "path-to-regexp": "^2.4.0",
     "vue-router": "^3.0.1"
   },
   "scripts": {

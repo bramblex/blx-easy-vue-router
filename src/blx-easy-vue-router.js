@@ -1,6 +1,23 @@
 
 import VueRouter from 'vue-router'
-import pathToRegexp from 'path-to-regexp'
+
+const adapters = {
+    default: { from: v => v, to: v => v, },
+    number: { from: v => parseFloat(v), to: v => v.toString() },
+    time: { from: v => new Date(v), to: v => (+v).toString() },
+    boolean: { from: v => v === 'true' ? true : false, to: v => v.toString() }
+}
+
+function template(tpl, re) {
+    const matched = tpl.match(new RegExp(re, 'g'))
+    const tmp = {}
+    for (const token of matched) {
+        const [, name] = re.exec(token)
+        tmp[name] = true
+    }
+    const tplFunc = new Function('env', 'return' + JSON.stringify(tpl).replace(re, '" + env.$1 + "'))
+    return tplFunc
+}
 
 function beforeCreate() {
     const easyMapRoute = this.$options.easyMapRoute
@@ -21,11 +38,16 @@ function beforeCreate() {
             ..._option
         }
 
+        const { from, to } = {
+            ...adapters.default,
+            ...(typeof adapter === 'string' ? adapters[adapter] : adapter)
+        }
+
         let getter, setter
 
         getter = function () {
             const value = this.$route[type][name]
-            return value ? adapter.from(value) : _default
+            return value ? from(value) : _default
         }
 
         const method = replace ? 'replace' : 'push'
@@ -37,22 +59,26 @@ function beforeCreate() {
                     delete query[name]
                     this.$router[method]({ query })
                 } else {
-                    this.$route[method]({
-                        ...this.$route.query,
-                        [name]: adapter.to(value)
+                    this.$router[method]({
+                        query: {
+                            ...this.$route.query,
+                            [name]: to(value)
+                        }
                     })
                 }
             }
         } else if (type === 'params') {
             setter = function (value) {
-                const { path } = this.$route.matched.pop()
+                const { path } = this.$route.matched[this.$route.matched.length - 1]
+                const toPath = template(path, /:([a-zA-Z0-9_-]+)/)
                 this.$router[method]({
-                    path: pathToRegexp.compile(path)({ ...this.$route.params, [name]: adapter.to(value) }),
+                    path: toPath({ ...this.$route.params, [name]: to(value) }),
                     query: { ...this.$route.query }
                 })
             }
         }
 
+        if (!this.$options.computed) this.$options.computed = {}
         this.$options.computed[alias] = { get: getter, set: setter }
     }
 }
@@ -70,9 +96,19 @@ export default class BLXEasyVueRouter extends VueRouter {
         }
     }
 
+    forcePush(route) {
+        this.refresh('/__empty')
+        this.app.$nextTick(() => { this.push(route) })
+    }
+
+    forceReplace(route) {
+        this.refresh('/__empty')
+        this.app.$nextTick(() => { this.replace(route) })
+    }
+
     refresh() {
         const route = this.currentRoute
-        this.replace('/_empty')
+        this.replace('/__empty')
         this.app.$nextTick(() => { this.replace(route) })
     }
 
@@ -82,15 +118,9 @@ export default class BLXEasyVueRouter extends VueRouter {
 
 }
 
-const adapters = {
-    default: { from: v => v, to: v => v, },
-    number: { form: v => parseFloat(v), to: v => v.toString() },
-    time: { from: v => new Date(v), to: v => (+v).toString() }
-}
-
 BLXEasyVueRouter.adapters = adapters
 
 // 遵循 Vue 的标准，如果有 window.Vue 则自动 use
 if (typeof window === 'object' && window.Vue && typeof window.Vue.use === 'function') {
-    Vue.use({ install })
+    Vue.use({ install: BLXEasyVueRouter.install })
 }
