@@ -13,51 +13,25 @@
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
     <script src="https://unpkg.com/vue-async-computed"></script>
-    <script src="../dist/blx-easy-vue-router.umd.js"></script>
+    <script src="https://unpkg.com/blx-easy-vue-router"></script>
 
     <div id="app">
-        <h1>Hello App!</h1>
-        <p>
-            <!-- 使用 router-link 组件来导航. -->
-            <!-- 通过传入 `to` 属性指定链接. -->
-            <!-- <router-link> 默认会被渲染成一个 `<a>` 标签 -->
-            <router-link to="/foo">Go to Foo</router-link>
-            <router-link to="/bar">Go to Bar</router-link>
-        </p>
-        <!-- 路由出口 -->
-        <!-- 路由匹配到的组件将渲染在这里 -->
         <router-view></router-view>
     </div>
 
 
     <script>
-        // 1. 定义 (路由) 组件。
-        // 可以从其他文件 import 进来
-        const Foo = { template: '<div>foo</div>' }
-        const Bar = { template: '<div>bar</div>' }
-        const Test = {
-            template: `<div>
-                    params: <input type="number" v-model.number="id">
-                    query: <input type="number" v-model.number="page">
-                    </div>`,
-            easyMapRoute: {
-                id: {
-                    type: 'params',
-                    name: 'id',
-                    adapter: 'number'
-                },
-                page: {
-                    type: 'query',
-                    name: 'page',
-                    adapter: 'number',
-                    default: 1
-                }
-            }
-        }
 
         const TestPage = {
+            data() {
+                return {
+                    searchInput: this.$route.query.search || ''
+                }
+            },
             template: `<div>
-                <div>分页和路由绑定, 可以用 v-model 绑定 <input type="number" v-model.number="page"></div>
+                <div>分页和路由绑定, 可以用 v-model 绑定 </div>
+                <div>page: <input type="number" v-model.number="page"></div>
+                <div>search: <input v-model="searchInput"><button @click="search = searchInput">搜索</button></div>
                 <div> 异步请求：{{ someData }} </div>
                 </div>`,
             easyMapRoute: {
@@ -66,38 +40,26 @@
                     name: 'page',
                     adapter: 'number',
                     default: 1
-                }
+                },
+                search: { type: 'query', name: 'search' }
             },
             asyncComputed: {
                 async someData() {
-                    const data = 'page: ' + this.page + ' 的数据'
+                    const data = 'page: ' + this.page + ' 和 search: ' + JSON.stringify(this.search) + '的数据'
                     await new Promise(resolve => setTimeout(resolve, 300))
                     return data
                 }
             }
         }
 
-        const routes = [
-            { path: '/test_page', component: TestPage },
-            { path: '/foo', component: Foo },
-            { path: '/bar', component: Bar },
-            { path: '/test/:id', component: Test },
-        ]
+        const routes = [{ path: '/', component: TestPage }]
 
-        // 3. 创建 router 实例，然后传 `routes` 配置
-        // 你还可以传别的配置参数, 不过先这么简单着吧。
-        const router = new VueRouter({
-            routes // (缩写) 相当于 routes: routes
-        })
+        const router = new BLXEasyVueRouter({ routes })
 
-        // 4. 创建和挂载根实例。
-        // 记得要通过 router 配置参数注入路由，
-        // 从而让整个应用都有路由功能
         const app = new Vue({
             router
         }).$mount('#app')
 
-// 现在，应用已经启动了！
     </script>
 </body>
 
