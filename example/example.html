@@ -56,13 +56,23 @@
         }
 
         const TestPage = {
-            template: `<div>分页和路由绑定, 可以用 v-model 绑定 <input type="number" v-model.number="page"></div>`,
+            template: `<div>
+                <div>分页和路由绑定, 可以用 v-model 绑定 <input type="number" v-model.number="page"></div>
+                <div> 异步请求：{{ someData }} </div>
+                </div>`,
             easyMapRoute: {
                 page: {
                     type: 'query',
                     name: 'page',
                     adapter: 'number',
                     default: 1
+                }
+            },
+            asyncComputed: {
+                async someData() {
+                    const data = 'page: ' + this.page + ' 的数据'
+                    await new Promise(resolve => setTimeout(resolve, 300))
+                    return data
                 }
             }
         }
